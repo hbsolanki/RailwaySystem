@@ -2,6 +2,7 @@ import User.User;
 import User.User.*;
 import Admin.Admin;
 import Admin.Admin.*;
+import Database.Database;
 import Database.Database.*;
 
 import java.util.*;
@@ -12,7 +13,7 @@ public class Main {
     static HashMap<Integer,Ticket> map=new HashMap<>();
     static Scanner sc=new Scanner(System.in);
 
-    public static void main(String[] args) {
+    public static void main(String[] args) throws Exception {
         Admin a=new Admin();
         User u=new User();
 
@@ -95,7 +96,7 @@ public class Main {
     }
     
 
-    public static void admin(String id,Admin a){
+    public static void admin(String id,Admin a) throws Exception{
         int ch;
         do{
             System.out.println("(1)Add Route (2)Add Train (3)Quit");
@@ -121,14 +122,14 @@ public class Main {
         }while(ch!=3);
     }
 
-    public static void user(String username,User u){
+    public static void user(String username,User u) throws Exception{
         int ch;
         do{
             System.out.println("(1)Ticket Book (2)Ticket view (3)Exit");
             ch=sc.nextInt();
             switch(ch){
                 case 1 :System.out.println(); 
-                        u.ticketBook(username,allTrain,map);
+                        u.ticketBook(username,Database.getAllTrain(),Database.getAllTicket());
                         System.out.println();
                          break;
                 case 2 : System.out.println("Enter Ticket No");

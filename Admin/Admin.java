@@ -2,6 +2,7 @@ package Admin;
 
 import Station.*;
 import java.util.*;
+import Database.Database;
 
 public class Admin {
 
@@ -23,7 +24,7 @@ public class Admin {
         }
      }
      
-     public Route addNewRoute(){
+     public Route addNewRoute() throws Exception{
         boolean flag=true;
         ArrayList<Station> route=new ArrayList<>();
         int cnt=1;
@@ -49,7 +50,7 @@ public class Admin {
             sc.nextLine();
         }
           
-        
+        Database.routeInDB(route);
         return new Route(route);
      }
 
@@ -63,7 +64,7 @@ public class Admin {
             this.stop=stop;
         }
 
-        public void trainShow(){
+        protected void trainShow(){
             System.out.println();
             System.out.println("Train Number : "+tno);
             System.out.println("Train Name : "+tname);
@@ -76,7 +77,7 @@ public class Admin {
         }
     }
 
-    public Train addTrain(ArrayList<Route> route){
+    public Train addTrain(ArrayList<Route> route)throws Exception{
         if(route.size()<=0){
             System.out.println("NO ANY Route Availabel");
             return null;
@@ -131,8 +132,12 @@ public class Admin {
             cnt++;
         }while(ch!=0||ch>route.size()||(cnt==route.size()));
 
+        Train t=new Train(no, name, trainStop);
+        System.out.println("*-*-* Train *-*-*");
+        t.trainShow();
         
-        return new Train(no, name, trainStop);
+        Database.trainInDB(t);
+        return t;
     }
 }
 

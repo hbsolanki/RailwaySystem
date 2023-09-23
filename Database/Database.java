@@ -12,22 +12,34 @@ import User.User.Ticket;
 
 
 public class Database {
-        static ArrayList<Route> allRoute=new ArrayList<>();
-        static ArrayList<Train> allTrain=new ArrayList<>();
-        static HashMap<Integer,Ticket> map=new HashMap<>();
-        static Connection con;
         static Admin a=new Admin();
         static User u=new User();
 
+        public static ArrayList<Route> getAllRoute() throws Exception{
+            return getRouteDB();
+        }
+
+        public static ArrayList<Train> getAllTrain() throws Exception{
+            return getTrainDB();
+        }
+
+        public static HashMap<Integer,Ticket> getAllTicket() throws Exception{
+            return getTicketDB();
+        }
+
+        private static Connection getCon()throws Exception{
+            return DriverManager.getConnection("com.mysql.cj.jdbc.Driver", "root","");
+        }
+
         //route Table(rid,name,src,km)
-        public static void routeInDB(Route route2)throws Exception{
+        public static void routeInDB(ArrayList<Station> routeStations)throws Exception{
             String sql="insert into Route(rid,name,src,km) values (?,?)";
+            Connection con=getCon();
             PreparedStatement pst=con.prepareStatement(sql);
-            ArrayList<Station> route=route2.route;
             pst.setInt(1,1);
             String station="";
-            for(int i=0;i<route.size();i++){
-                Station s=route.get(i);
+            for(int i=0;i<routeStations.size();i++){
+                Station s=routeStations.get(i);
                 station=s.name+","+s.src+","+s.km+";";
             }
         }
@@ -35,6 +47,7 @@ public class Database {
         //train(tname,tno,totalseats,stops)
         public static void trainInDB(Train t)throws Exception{
             String sql="insert into Train(tname,tno,totalseats,stops) values(?,?,?,?)";
+            Connection con=getCon();
             PreparedStatement pst=con.prepareStatement(sql);
             ArrayList<Station> stop=t.stop;
             String stops="";
@@ -52,6 +65,7 @@ public class Database {
         //ticket(username,ticketno,price,personlist(oneString),phone,Train t(trainnumber,trainname),srcname,destname,srctime,desttime)
         public static void ticketDetailsInDB(Ticket tick)throws Exception{
             String sql="insert into ticket(username,ticketno,price,personlist,phone,trainnumber,trainname,source,destiniy,stime,dtime) values(?,?,?,?,?,?,?,?,?,?,?)";
+            Connection con=getCon();
             PreparedStatement pst=con.prepareStatement(sql);
             pst.setString(1,tick.username);
             pst.setInt(2, tick.ticketNo);
@@ -75,8 +89,9 @@ public class Database {
 
 
     //route Table(name,src,km)
-    public void getRouteDB()throws Exception{
+    private static ArrayList<Route> getRouteDB()throws Exception{
         String sql="select * from Route";
+        Connection con=getCon();
         PreparedStatement pst=con.prepareStatement(sql);
         ResultSet rs=pst.executeQuery();
         Route r=null;
@@ -97,14 +112,17 @@ public class Database {
             }
             
         }
-        
+        ArrayList<Route> allRoute=new ArrayList<>();
         allRoute.add(a.new Route(rut));
+        return allRoute;
     }
 
     //train(tname,tno,totalseats,stops)
     //s.name+","+s.src+","+s.km+","+s.time+";";
-    public void getTrainDB()throws Exception{
+    private static ArrayList<Train> getTrainDB()throws Exception{
+        ArrayList<Train> allTrain=new ArrayList<>();
         String sql="select * from train";
+        Connection con=getCon();
         PreparedStatement pst=con.prepareStatement(sql);
         ResultSet rs=pst.executeQuery();
         while(rs.next()){
@@ -130,11 +148,14 @@ public class Database {
             }
             allTrain.add(a.new Train(tno, tname, stops));
         }
+        return allTrain;
     }
 
     //ticket(username,ticketno,price,personlist(oneString),phone,Train t(trainnumber,trainname),srcname,destname,srctime,desttime)
-    public void getTicketDB()throws Exception{
+    private static HashMap<Integer,Ticket> getTicketDB()throws Exception{
+        HashMap<Integer,Ticket> map=new HashMap<>();
         String sql="select * from ticket";
+        Connection con=getCon();
         PreparedStatement pst=con.prepareStatement(sql);
         ResultSet rs=pst.executeQuery();
 
@@ -175,10 +196,13 @@ public class Database {
             Station src=getStationS(t, srcName);
             Station dest=getStationS(t, destName);
             Ticket tick=u.new Ticket(username, ticketNo, price, mapp, phone, t, src, dest);
+            map.put(ticketNo, tick);
         }
+        return map;
     }
 
-    public static Train getTrainT(int trainNumber){
+    private static Train getTrainT(int trainNumber) throws Exception{
+        ArrayList<Train> allTrain=getAllTrain();
         for(int i=0;i<allTrain.size();i++){
             if(allTrain.get(i).tno==trainNumber){
                 return allTrain.get(i);
@@ -187,7 +211,7 @@ public class Database {
         return null;
     }
 
-    public static Station getStationS(Train t,String name){
+    private static Station getStationS(Train t,String name){
         ArrayList<Station> all=t.stop;
         for(int i=0;i<all.size();i++){
             if(all.get(i).name.equals(name)){
