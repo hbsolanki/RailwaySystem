@@ -3,6 +3,7 @@ package Admin;
 import Station.*;
 import java.util.*;
 import Database.Database;
+import Check.Check;
 
 public class Admin {
 
@@ -24,9 +25,9 @@ public class Admin {
         }
      }
      
-     public Route addNewRoute() throws Exception{
+     public void addNewRoute() throws Exception{
         boolean flag=true;
-        ArrayList<Station> route=new ArrayList<>();
+        ArrayList<Station> routeStationList=new ArrayList<>();
         int cnt=1;
         while(flag){
             System.out.println("Enter Details Of Station "+cnt);
@@ -37,7 +38,7 @@ public class Admin {
             System.out.print("km From Source : ");
             int km=sc.nextInt();
             Station s=new Station(sName, src, km);
-            route.add(s);
+            routeStationList.add(s);
             System.out.println();
             System.out.println("For Quit 0 or ADD MORE 1");
             int ch=sc.nextInt();
@@ -50,8 +51,7 @@ public class Admin {
             sc.nextLine();
         }
           
-        Database.routeInDB(route);
-        return new Route(route);
+        Database.routeStoreInDB(routeStationList);
      }
 
      public class Train{
@@ -71,16 +71,26 @@ public class Admin {
             System.out.println("Train Staops : ");
             for(int i=0;i<stop.size();i++){
                 Station s=stop.get(i);
-                System.out.println((i+1)+s.name+"-"+s.time);
+                System.out.println((i+1)+" "+s.name+"-"+s.time);
             }
             System.out.println();
         }
+
+        public Station getStationDetails(String name){
+            Station s=null;
+            for(int i=0;i<stop.size();i++){
+                if(stop.get(i).name.equalsIgnoreCase(name)){
+                    return stop.get(i);
+                }
+            }
+            return s;
+        }
     }
 
-    public Train addTrain(ArrayList<Route> route)throws Exception{
+    public void addTrain(ArrayList<Route> route)throws Exception{
         if(route.size()<=0){
             System.out.println("NO ANY Route Availabel");
-            return null;
+            return;
         }
         for(int i=0;i<route.size();i++){
             System.out.println("        *-*-*Route : "+(i+1));
@@ -91,7 +101,7 @@ public class Admin {
 
         if(r<1 || r>route.size()){
             System.out.println("Invalid Option");
-            return null;
+            return;
         }
         Route selectRoute=route.get(r-1);
         ArrayList<Station> routeStation=selectRoute.route;
@@ -124,11 +134,16 @@ public class Admin {
                 continue;
             }
             sc.nextLine();
-            System.out.print("Enter Time Reach Train At Station : ");
-            String time=sc.nextLine();
-            routeStation.get((ch-1)).time=time;
-            routeStation.get(ch-1).totalSeats=totalSeats;
-            trainStop.add(routeStation.get((ch-1)));
+            String time;
+            do{
+                System.out.print("Enter Time Reach Train At Station : ");
+                time=sc.nextLine();
+            }while(!Check.time(time));
+            Station routeStaion=routeStation.get(ch-1);
+            Station s=new Station(routeStaion.name,routeStaion.src,routeStaion.km);
+            s.time=time;
+            s.totalSeats=totalSeats;
+            trainStop.add(s);
             cnt++;
         }while(ch!=0||ch>route.size()||(cnt==route.size()));
 
@@ -137,7 +152,6 @@ public class Admin {
         t.trainShow();
         
         Database.trainInDB(t);
-        return t;
     }
 }
 

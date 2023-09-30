@@ -1,9 +1,13 @@
 package User;
 
+import java.io.BufferedWriter;
+import java.io.FileWriter;
+import java.io.IOException;
 import java.util.*;
 import Admin.Admin.Train;
-
+import Database.Database;
 import Station.Station;
+import Check.Check;
 
 public class User {
 
@@ -30,10 +34,10 @@ public class User {
         }
     }
 
-    public void ticketBook(String username,ArrayList<Train> allTrain,HashMap<Integer,Ticket> map){
-        System.out.println("Enter Srouce Station : ");
+    public void ticketBook(String username,ArrayList<Train> allTrain,HashMap<Integer,Ticket> map) throws Exception{
+        System.out.print("Enter Srouce Station : ");
         String src=sc.nextLine();
-        System.out.println("Enter Destiny Station : ");
+        System.out.print("Enter Destiny Station : ");
         String dest=sc.nextLine();
         if(src.equals(dest)){
             System.out.println("Both Same!! Invalid Selections...");
@@ -47,19 +51,25 @@ public class User {
             System.out.println();
             return;
         }
-        System.out.println("Availabel Trains");
+
+        System.out.println();
+        System.out.println();
+        System.out.println("     --Availabel Trains-- ");
+        System.out.println();
         for(int i=0;i<availTrain.size();i++){
             System.out.println("Train : "+(i+1));
             System.out.println("Name : "+availTrain.get(i).tname);
+            System.out.println(src+" : "+availTrain.get(i).getStationDetails(src).time);
+            System.out.println(dest+" : "+availTrain.get(i).getStationDetails(dest).time);
         }
         System.out.println();
-        System.out.print("Enter Train Number For Select :");
+        System.out.print("Enter Train Number For Select : ");
         int select=sc.nextInt();
-        if(select<0 && select>availTrain.size()){
+        if(select<1 && select>availTrain.size()){
             System.out.println("Please Select Valid Try Again.....");
             return;
         }
-        Train t=availTrain.get(select+1);
+        Train t=availTrain.get(select-1);
         
         
         synchronized(this){
@@ -77,44 +87,21 @@ public class User {
             }
 
             sc.nextLine();
-            boolean flag=false;
+            
             String number;
             do{
                 System.out.print("Enter Mobile Number : ");
                 number=sc.nextLine();
-                if(number.length()==10){
-                    for(int i=0;i<10;i++){
-                        if(number.charAt(i)<'0' && number.charAt(i)>'9'){
-                            flag=true;
-                            continue;
-                        }
-                    }
-                } 
-            }while(flag);
+            }while(!Check.mobileNumber(number));
 
-            int ticketNo=(int)(Math.random()*6);
+            int ticketNo=(int)(Math.random()*1000);
 
             int price=calculate(t, src, dest)*n;
 
-            Station s=null;
-            Station d=null;
-            ArrayList<Station> stops=t.stop;
-            for(int i=0;i<stops.size();i++){
-                if(stops.get(i).name.equals(src)){
-                    s=stops.get(i);
-                }
-                if(s!=null){
-                    stops.get(i).totalSeats-=n;
-                }
-                if(stops.get(i).equals(dest)){
-                    d=stops.get(i);
-                    break;
-                }
-            }
-
-            Ticket tic=new Ticket(username,ticketNo,price,person, number, t, s, d);
-            map.put(ticketNo, tic);
-            System.out.println("You Pay "+price + " inr");
+            Ticket tic=new Ticket(username,ticketNo,price,person, number, t,t.getStationDetails(src),t.getStationDetails(dest));
+            Database.ticketDetailsInDB(tic);
+            System.out.println();
+            System.out.println("You Pay "+price + "inr");
             System.out.println("Your Ticket Book Successfuly \nTicket No."+ticketNo);
         }
 
@@ -122,9 +109,7 @@ public class User {
     }
 
     private static int calculate(Train t,String src,String dest){
-        int sidx=t.stop.indexOf(src);
-        int eidx=t.stop.indexOf(dest);
-        int km=t.stop.get(sidx).km-t.stop.get(eidx).km;
+        int km=t.getStationDetails(dest).km-t.getStationDetails(src).km;
         int price=(int) ((int) km*0.533);
         if(price<30){
             price=30;
@@ -132,23 +117,68 @@ public class User {
         return price;
     }
 
-    public synchronized void ticketView(int ticketNo,HashMap<Integer,Ticket> map){
-        Ticket tick=map.get(ticketNo);
+    public void viewTicket(HashMap<Integer,Ticket> map){
+        System.out.print("Enter Ticket No : ");
+        int ticketNumber=sc.nextInt();
+        if(!map.containsKey(ticketNumber)){
+            System.out.println("Invalid Ticket Number Try Again...");
+        }
+        Ticket tick=map.get(ticketNumber);
         System.out.println("            *-*-* Railway Ticket *-*-*");
         System.out.println();
-        System.out.println("Ticket No : "+ticketNo);
+        System.out.println("Ticket No : "+ticketNumber);
         System.out.println("username : "+tick.username);
         System.out.println("Phone Number : "+tick.phone);
-        System.out.println("Source Station : "+tick.src);
-        System.out.println("Destiniy Station : "+tick.dest);
+        System.out.println("Source Station : "+tick.src.name);
+        System.out.println("Destiniy Station : "+tick.dest.name);
         System.out.println("Time : "+tick.src.time+"-"+tick.dest.time);
         System.out.println("Total KM : "+(tick.dest.km-tick.src.km));
         System.out.println("Price : "+tick.price);
         System.out.println("Persons Lists : ");
-        HashMap<String,Integer> list=new HashMap<>();
+        HashMap<String,Integer> list=tick.person;
         for(Map.Entry m : list.entrySet()){
-            System.out.println(m.getKey()+" - "+m.getValue());
+            System.out.println("   ✤ "+m.getKey()+" - "+m.getValue());
         }
+    }
+
+    public void printTicket(HashMap<Integer,Ticket> map)throws IOException{
+        System.out.print("Enter Ticket No : ");
+        int ticketNumber=sc.nextInt();
+        if(!map.containsKey(ticketNumber)){
+            System.out.println("Invalid Ticket Number Try Again...");
+        }
+        Ticket tick=map.get(ticketNumber);
+        String fileName=ticketNumber+".txt";
+        BufferedWriter br=new BufferedWriter(new FileWriter(fileName));
+        br.write("            *-*-* Railway Ticket *-*-*");
+        br.newLine();
+        br.newLine();
+        br.write("Ticket No : "+ticketNumber);
+        br.newLine();
+        br.write("username : "+tick.username);
+        br.newLine();
+        br.write("Phone Number : "+tick.phone);
+        br.newLine();
+        br.write("Source Station : "+tick.src.name);
+        br.newLine();
+        br.write("Destiniy Station : "+tick.dest.name);
+        br.newLine();
+        br.write("Time : "+tick.src.time+"-"+tick.dest.time);
+        br.newLine();
+        br.write("Total KM : "+(tick.dest.km-tick.src.km));
+        br.newLine();
+        br.write("Price : "+tick.price);
+        br.newLine();
+        br.write("Persons Lists : ");
+        br.newLine();
+        HashMap<String,Integer> list=tick.person;
+        for(Map.Entry m : list.entrySet()){
+            br.write("   ✤"+m.getKey()+" - "+m.getValue());
+        }
+
+        br.flush();
+        br.flush();
+        System.out.println("File Save.. File Name : "+fileName);
     }
 
     private ArrayList<Train> getTrains(String src,String dest,ArrayList<Train> allTrain){
@@ -157,11 +187,11 @@ public class User {
             Train t=allTrain.get(i);
             ArrayList<Station> stops=t.stop;
             boolean flag=false;
-            for(int k=0;k<stops.size();i++){
-                if(stops.get(k).equals(src)){
+            for(int k=0;k<stops.size();k++){
+                if(stops.get(k).name.equalsIgnoreCase(src)){
                     flag=true;
                 }
-                if(flag && stops.get(k).equals(dest)){
+                if(flag && stops.get(k).name.equalsIgnoreCase(dest)){
                     list.add(t);
                     break;
                 }

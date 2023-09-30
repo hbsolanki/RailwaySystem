@@ -26,21 +26,33 @@ public class Database {
         public static HashMap<Integer,Ticket> getAllTicket() throws Exception{
             return getTicketDB();
         }
-
-        private static Connection getCon()throws Exception{
-            return DriverManager.getConnection("com.mysql.cj.jdbc.Driver", "root","");
+        
+        public static HashMap<String,String> allAdmins()throws Exception{
+            return getAdmins();
         }
 
-        //route Table(rid,name,src,km)
-        public static void routeInDB(ArrayList<Station> routeStations)throws Exception{
-            String sql="insert into Route(rid,name,src,km) values (?,?)";
+        public static HashMap<String,String> allUsers()throws Exception{
+            return getUsers();
+        }
+
+        private static Connection getCon()throws Exception{
+            return DriverManager.getConnection("jdbc:mysql://localhost:3306/railway", "root","8160062665");
+        }
+
+        //route Table(rid,station)
+        public static void routeStoreInDB(ArrayList<Station> routeStationList)throws Exception{
+            String sql="insert into Route(station) values (?)";
             Connection con=getCon();
             PreparedStatement pst=con.prepareStatement(sql);
-            pst.setInt(1,1);
-            String station="";
-            for(int i=0;i<routeStations.size();i++){
-                Station s=routeStations.get(i);
-                station=s.name+","+s.src+","+s.km+";";
+            String stationInStr="";
+            for(int i=0;i<routeStationList.size();i++){
+                Station s=routeStationList.get(i);
+                stationInStr+=s.name+","+s.src+","+s.km+";";
+            }
+            pst.setString(1, stationInStr);
+            int r=pst.executeUpdate();
+            if(r>0){
+                System.out.println("success");
             }
         }
 
@@ -53,7 +65,7 @@ public class Database {
             String stops="";
             for(int i=0;i<stop.size();i++){
                 Station s=stop.get(i);
-                stops=s.name+","+s.src+","+s.km+","+s.time+";";
+                stops+=s.name+","+s.src+","+s.km+","+s.time+";";
             }
             pst.setString(1, t.tname);
                 pst.setInt(2, t.tno);
@@ -74,7 +86,7 @@ public class Database {
             HashMap<String,Integer> list=tick.person;
             String perlist="";
             for(Map.Entry m : list.entrySet()){
-                perlist=m.getKey()+" - "+m.getValue()+";";
+                perlist+=m.getKey()+" - "+m.getValue()+";";
             }
 
             pst.setString(4,perlist);
@@ -85,8 +97,28 @@ public class Database {
             pst.setString(9, tick.dest.name);
             pst.setString(10, tick.src.time);
             pst.setString(11, tick.dest.time);
+            pst.executeUpdate();
         }
 
+        // user(username,password)
+        public static void UserDatailsInDB(String username,String pass)throws Exception{
+            String sql="insert into user(username,password) values(?,?)";
+            Connection con=getCon();
+            PreparedStatement pst=con.prepareStatement(sql);
+            pst.setString(1, username);
+            pst.setString(2, pass);
+            pst.executeUpdate();
+        }
+
+    // admin(id,password)
+        public static void adminDatailsInDB(String id,String pass)throws Exception{
+            String sql="insert into user(id,pass) values(?,?)";
+            Connection con=getCon();
+            PreparedStatement pst=con.prepareStatement(sql);
+            pst.setString(1, id);
+            pst.setString(2, pass);
+            pst.executeUpdate();
+    }
 
     //route Table(name,src,km)
     private static ArrayList<Route> getRouteDB()throws Exception{
@@ -103,10 +135,10 @@ public class Database {
             for(int i=0;i<stations.length;i++){
                 String station=stations[i];
                 String instation[]=station.split(",");
-                Station s=null;
+                Station s=new Station("","",0);
                 s.name=instation[0];
                 s.src=instation[1];
-                String km=instation[3];
+                String km=instation[2];
                 s.km=Integer.parseInt(km);
                 rut.add(s);
             }
@@ -139,7 +171,7 @@ public class Database {
 
                 String stationName=s[0];
                 String src=s[1];
-                int km=Integer.parseInt(s[2]);
+                int km=Integer.parseInt(s[2].trim());
                 String time=s[3];
                 Station stationADD=new Station(stationName, src, km);
                 stationADD.time=time;
@@ -169,8 +201,8 @@ public class Database {
             HashMap<String,Integer> mapp=new HashMap<>();
             for(int i=0;i<presonlists.length;i++){
                 String []person=presonlists[i].split("-");
-                String name=person[0];
-                int age=Integer.parseInt(person[1]);
+                String name=person[0].trim();
+                int age=Integer.parseInt(person[1].trim());
                 mapp.put(name, age);
 
             }
@@ -184,14 +216,6 @@ public class Database {
             String srcTime=rs.getString(10);
             String destTime=rs.getString(11);
 
-            // pst.setString(4,perlist);
-            // pst.setString(5, tick.phone);
-            // pst.setInt(6, tick.t.tno);
-            // pst.setString(7, tick.t.tname);
-            // pst.setString(8, tick.src.name);
-            // pst.setString(9, tick.dest.name);
-            // pst.setString(10, tick.src.time);
-            // pst.setString(11, tick.dest.time);
             Train t=getTrainT(trainNumber);
             Station src=getStationS(t, srcName);
             Station dest=getStationS(t, destName);
@@ -219,6 +243,32 @@ public class Database {
             }
         }
         return null;
+    }
+
+    // user(username,password)
+    private static HashMap<String, String> getUsers()throws Exception{
+        HashMap<String,String> allUsers=new HashMap<>();
+        String sql="select * from user";
+        Connection con=getCon();
+        PreparedStatement pst=con.prepareStatement(sql);
+        ResultSet rs=pst.executeQuery();
+        while(rs.next()){
+            allUsers.put(rs.getString(1), rs.getString(2));
+        }
+        return allUsers;
+    }
+
+    // admin(id,password)
+    private static HashMap<String, String> getAdmins()throws Exception{
+        HashMap<String,String> allAdmins=new HashMap<>();
+        String sql="select * from admin";
+        Connection con=getCon();
+        PreparedStatement pst=con.prepareStatement(sql);
+        ResultSet rs=pst.executeQuery();
+        while(rs.next()){
+            allAdmins.put(rs.getString(1), rs.getString(2));
+        }
+        return allAdmins;
     }
 }
 

@@ -1,0 +1,12 @@
+            *-*-* Railway Ticket *-*-*
+
+Ticket No : 1
+username : hb
+Phone Number : 8160062665
+Source Station : Botad
+Destiniy Station : Sarkhej
+Time : 07:06-09:37
+Total KM : 148
+Price : 78
+Persons Lists : 
+   ✤Hardik - 19
