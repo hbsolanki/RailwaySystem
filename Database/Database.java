@@ -36,7 +36,7 @@ public class Database {
         }
 
         private static Connection getCon()throws Exception{
-            return DriverManager.getConnection("jdbc:mysql://localhost:3306/railway", "root","8160062665");
+            return DriverManager.getConnection("jdbc:mysql://localhost:3306/railway", "root","");
         }
 
         //route Table(rid,station)
