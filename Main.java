@@ -57,12 +57,12 @@ public class Main {
                                         user(username,u);
                                         break;
                                     }else{
-                                        System.out.println("Enter Valid Password");
+                                        throw new Exception("Wrong Password Try Again..");
                                     }
                                 }while(true);
                                 
                             }else{
-                                System.out.println("this username not found");
+                                throw new Exception("This Username Not Found");
                             }
                          }else if(c1==2){
                             sc.nextLine();
@@ -93,12 +93,12 @@ public class Main {
                                         admin(id, a);
                                         break;  
                                     }else{
-                                        System.out.println("Enter Valid Password");
+                                        throw new Exception("Wrong Password Try Again..");
                                     }
                                 }while(true);
                                 
                             }else{
-                                System.out.println("this ID not found");
+                                throw new Exception("This id Not Found");
                             }
                          }else if(c2==2){
                             sc.nextLine();
