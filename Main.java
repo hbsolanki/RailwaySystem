@@ -2,7 +2,7 @@ import User.User;
 import User.User.*;
 import Admin.Admin;
 import Admin.Admin.*;
-import Database.Database;
+import Database.DB;
 
 import java.util.*;
 
@@ -11,23 +11,23 @@ public class Main {
     static Scanner sc=new Scanner(System.in);
 
     private static ArrayList<Route> getAllRoute() throws Exception{
-        return Database.getAllRoute();
+        return DB.getAllRoute();
     }
 
     private static ArrayList<Train> getAllTrain() throws Exception{
-        return Database.getAllTrain();
+        return DB.getAllTrain();
     }
 
     private static HashMap<Integer,Ticket> getAllTicket() throws Exception{
-        return Database.getAllTicket();
+        return DB.getAllTicket();
     }
 
     private static HashMap<String,String> allAdmins()throws Exception{
-        return Database.allAdmins();
+        return DB.allAdmins();
     }
 
     private static HashMap<String,String> allUsers()throws Exception{
-        return Database.allUsers();
+        return DB.allUsers();
     }
     public static void main(String[] args) throws Exception {
         Admin a=new Admin();
@@ -54,7 +54,7 @@ public class Main {
                                     System.out.print("Enter Password : ");
                                     String pass=sc.nextLine();
                                     if(allUser.get(username).equals(pass)){
-                                        user(username,u);
+                                        user(username,u,getAllTrain());
                                         break;
                                     }else{
                                         throw new Exception("Wrong Password Try Again..");
@@ -73,8 +73,8 @@ public class Main {
                             }
                             System.out.print("Enter Password : ");
                             String password=sc.nextLine();
-                            Database.UserDatailsInDB(username, password);
-                            user(username,u);
+                            DB.UserDatailsStoreInDB(username, password);
+                            user(username,u,getAllTrain());
                          }
                         break;
                 case 2 : System.out.println("(1)Already Admin (2)New Admin (3)Quit");
@@ -102,7 +102,8 @@ public class Main {
                             }
                          }else if(c2==2){
                             sc.nextLine();
-                            System.out.println("*-*New Admin \nEnter Id");
+                            System.out.println("*-*New Admin ");
+                            System.out.print("Enter Id");
                             String id=sc.nextLine();
                             if(allAdmin.containsKey(id)){
                                 System.out.println(id+" id already Taken try again..");
@@ -110,7 +111,7 @@ public class Main {
                             }
                             System.out.print("Enter Password : ");
                             String password=sc.nextLine();
-                            Database.adminDatailsInDB(id, password);
+                            DB.adminDatailsStoreInDB(id, password);
                             admin(id,a);
                          }
                         break;
@@ -128,7 +129,15 @@ public class Main {
             ch=sc.nextInt();
             switch(ch){
                 case 1 : System.out.println();
-                         a.addNewRoute();
+                         ArrayList<Integer> rNO=DB.routeNo();
+                         if(rNO.size()==0){
+                            sc.nextLine();
+                            a.addNewRoute(1);
+                         }else{
+                            sc.nextLine();
+                            a.addNewRoute(rNO.get(rNO.size()-1)+1);
+                         }
+                         
                          break;
                 case 2 : System.out.println();
                          a.addTrain(getAllRoute());
@@ -139,7 +148,7 @@ public class Main {
         }while(ch!=3);
     }
 
-    public static void user(String username,User u) throws Exception{
+    public static void user(String username,User u,ArrayList<Train> allTrains) throws Exception{
         System.out.println();
         int ch;
         do{
@@ -147,16 +156,17 @@ public class Main {
             ch=sc.nextInt();
             switch(ch){
                 case 1 :System.out.println(); 
-                        u.ticketBook(username,getAllTrain(),getAllTicket());
+                        u.ticketBook(username,allTrains,getAllTicket());
                         System.out.println();
                          break;
-                case 2 : u.viewTicket(getAllTicket());
+                case 2 : System.out.println();
+                u.viewTicket(getAllTicket());
                          break;
                 case 3 : u.printTicket(getAllTicket());
                          break;
                 case 4 : return;
                 default : System.out.println("InValid Option");            
             }
-        }while(ch!=3);
+        }while(true);
     }
 }

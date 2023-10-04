@@ -2,8 +2,8 @@ package Admin;
 
 import Station.*;
 import java.util.*;
-import Database.Database;
 import Check.Check;
+import Database.DB;
 
 public class Admin {
 
@@ -25,7 +25,8 @@ public class Admin {
         }
      }
      
-     public void addNewRoute() throws Exception{
+     public void addNewRoute(int rid) throws Exception{
+        sc.nextLine();
         boolean flag=true;
         ArrayList<Station> routeStationList=new ArrayList<>();
         int cnt=1;
@@ -37,7 +38,7 @@ public class Admin {
             String src=sc.nextLine();
             System.out.print("km From Source : ");
             int km=sc.nextInt();
-            Station s=new Station(sName, src, km);
+            Station s=new Station(sName, src, km,0,0,0,0);
             routeStationList.add(s);
             System.out.println();
             System.out.println("For Quit 0 or ADD MORE 1");
@@ -51,19 +52,22 @@ public class Admin {
             sc.nextLine();
         }
           
-        Database.routeStoreInDB(routeStationList);
+        //Database.routeStoreInDB(routeStationList);
+        DB.routeIdStoreInDB(rid);
+        DB.routeStoreInDB(rid, routeStationList);
      }
 
      public class Train{
         public int tno;
         public String tname;
         public ArrayList<Station> stop;
+        public HashMap<String,Integer> allSeats;
         public Train(int tno,String tname,ArrayList<Station> stop){
             this.tno=tno;
             this.tname=tname;
             this.stop=stop;
         }
-
+        
         protected void trainShow(){
             System.out.println();
             System.out.println("Train Number : "+tno);
@@ -95,6 +99,7 @@ public class Admin {
         for(int i=0;i<route.size();i++){
             System.out.println("        *-*-*Route : "+(i+1));
             route.get(i).showRoute();
+            System.out.println();
         }
         System.out.print("Enter Route Number For Select : ");
         int r=sc.nextInt();
@@ -111,9 +116,24 @@ public class Admin {
         sc.nextLine();
         System.out.print("Enter Train Name : ");
         String name=sc.nextLine();
-        
-        System.out.print("Enter Total Seats int Train : ");
-        int totalSeats=sc.nextInt();
+        HashMap<String,Integer> allSeats=new HashMap<>();
+        String arr[]={"sl","3rdAC","2ndAC","1stAC"};
+        int se;
+        do{
+            System.out.println("(1)SL (2)3rd AC (3)2nd AC (4)1st AC (5)Exit");
+            se=sc.nextInt();
+            if(se<1 || se>5){
+                System.out.println("Invalid Option");
+                continue;
+            }
+            if(se==5){
+                break;
+            }
+            System.out.print("Enter Seats : ");
+            int seat=sc.nextInt();
+            allSeats.put(arr[se-1], seat);
+        }while(true);
+
         ArrayList<Station> trainStop=new ArrayList<>();
         System.out.println();
         System.out.println();
@@ -140,9 +160,23 @@ public class Admin {
                 time=sc.nextLine();
             }while(!Check.time(time));
             Station routeStaion=routeStation.get(ch-1);
-            Station s=new Station(routeStaion.name,routeStaion.src,routeStaion.km);
+
+            
+            if(allSeats.get(arr[0])==null){
+                allSeats.put(arr[0], 0);
+            }
+            if(allSeats.get(arr[1])==null){
+                allSeats.put(arr[1], 0);
+            }
+            if(allSeats.get(arr[2])==null){
+                allSeats.put(arr[2], 0);
+            }
+            if(allSeats.get(arr[3])==null){
+                allSeats.put(arr[3], 0);
+            }
+            Station s=new Station(routeStaion.name,routeStaion.src,routeStaion.km,allSeats.get(arr[0]),allSeats.get(arr[1]),allSeats.get(arr[2]),allSeats.get(arr[3]));
             s.time=time;
-            s.totalSeats=totalSeats;
+            s.seats=allSeats;
             trainStop.add(s);
             cnt++;
         }while(ch!=0||ch>route.size()||(cnt==route.size()));
@@ -150,8 +184,8 @@ public class Admin {
         Train t=new Train(no, name, trainStop);
         System.out.println("*-*-* Train *-*-*");
         t.trainShow();
-        
-        Database.trainInDB(t);
+        DB.trainNoStoreInDB(t.tno);
+        DB.trainStoreInDB(t.tno, t);
     }
 }
 
