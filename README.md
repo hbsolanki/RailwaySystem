@@ -42,3 +42,4 @@ Database :
     truncate table admin;
     truncate table ticket;
     truncate table allroute;
+# RailwaySystem
