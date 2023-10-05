@@ -115,6 +115,8 @@ public class Main {
                             admin(id,a);
                          }
                         break;
+                case 3 : System.exit(0);
+                         break;
                 default : System.out.println("Enter valid Option");
             }
         }while(m!=3);  
@@ -158,6 +160,7 @@ public class Main {
                 case 1 :System.out.println(); 
                         u.ticketBook(username,allTrains,getAllTicket());
                         System.out.println();
+                        sc.nextLine();
                          break;
                 case 2 : System.out.println();
                 u.viewTicket(getAllTicket());

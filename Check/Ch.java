@@ -1,6 +1,7 @@
 package Check;
 
-public class Check {
+public class Ch {
+    
     public static boolean mobileNumber(String number){
         if(number.length()==10){
             for(int i=0;i<10;i++){
@@ -33,4 +34,5 @@ public class Check {
         }
         return true;
     }
+
 }

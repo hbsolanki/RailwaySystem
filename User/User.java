@@ -1,12 +1,10 @@
 package User;
 
-import java.io.BufferedWriter;
-import java.io.FileWriter;
-import java.io.IOException;
+import java.io.*;
 import java.util.*;
 import Admin.Admin.Train;
 import Station.Station;
-import Check.Check;
+import Check.Ch;
 import Database.DB;
 
 public class User {
@@ -36,7 +34,7 @@ public class User {
     }
 
     public void ticketBook(String username,ArrayList<Train> allTrain,HashMap<Integer,Ticket> map) throws Exception{
-        System.out.print("Enter Srouce Station : ");
+        System.out.print("Enter Source Station : ");
         String sourceStationName=sc.nextLine();
         System.out.print("Enter Destiny Station : ");
         String destinyStationName=sc.nextLine();
@@ -80,7 +78,11 @@ public class User {
         Station sourcStationObj=selectTrain.getStationDetails(sourceStationName);
         Station destiniyStationObj=selectTrain.getStationDetails(destinyStationName);
         System.out.println("Available Seats : ");
-        sourcStationObj.seatShow();
+        boolean avai=sourcStationObj.seatShow();
+        if(!avai){
+            System.out.println("NO ANY Ticket Available");
+            return;
+        }
 
         System.out.println();
         sc.nextLine();
@@ -100,7 +102,7 @@ public class User {
                 System.out.println("Ticket not Availabel");
                 return;
             }
-            decressSeats(couch,selectTrain,sourceStationName,destinyStationName,n);
+            
 
 
             HashMap<String,Integer> person=new HashMap<>();
@@ -116,9 +118,12 @@ public class User {
                 //sl
                 if(couch.equalsIgnoreCase("sl")){
                     for(int q=0;q<sourcStationObj.sl.length;q++){
+                        System.out.println(sourcStationObj.sl[q]);
+
                         if(sourcStationObj.sl[q]==false){
+                            System.out.println("Hello");
                             totalper++;
-                            person.put(name+":"+age+" seatNo-",q);
+                            person.put(name+":"+age+" seatNo-",(q+1));
                             sourcStationObj.sl[q]=true;
                             if(totalper==n){
                                 break;
@@ -129,7 +134,7 @@ public class User {
                     for(int q=0;q<sourcStationObj.tAC.length;q++){
                         if(sourcStationObj.tAC[q]==false){
                             totalper++;
-                            person.put(name+":"+age+" seatNo-",q);
+                            person.put(name+":"+age+" seatNo-",(q+1));
                             sourcStationObj.tAC[q]=true;
                         }
                         if(totalper==n){
@@ -140,7 +145,7 @@ public class User {
                     for(int q=0;q<sourcStationObj.sAC.length;q++){
                         if(sourcStationObj.sAC[q]==false){
                             totalper++;
-                            person.put(name+":"+age+" seatNo-",q);
+                            person.put(name+":"+age+" seatNo-",q+1);
                             sourcStationObj.sAC[q]=true;
                         }
                         if(totalper==n){
@@ -161,12 +166,13 @@ public class User {
                 }
             }
 
+            decressSeats(couch,selectTrain,sourceStationName,destinyStationName,n);
             String number;
             sc.nextLine();
             do{
                 System.out.print("Enter Mobile Number : ");
                 number=sc.nextLine();
-            }while(!Check.mobileNumber(number));
+            }while(!Ch.mobileNumber(number));
 
             int ticketNo=(int)(Math.random()*1000);
 
@@ -180,9 +186,6 @@ public class User {
             System.out.println("Your Ticket Book Successfuly \nTicket No."+ticketNo);
 
         }
-
-        
-        
     }
     
     private static void decressSeats(String couch,Train t,String source,String dest,int n){
@@ -202,8 +205,54 @@ public class User {
             if(flag){
                 int r=s.seats.get(couch);
                 s.seats.put(couch, r-n);
+                giveSeats(s, couch, n);
             }
         }
+    }
+
+    private static void giveSeats(Station s,String couch,int n){
+        int totalper=0;
+        if(couch.equalsIgnoreCase("sl")){
+                    for(int q=0;q<s.sl.length;q++){
+                        if(s.sl[q]==false){
+                            totalper++;
+                            s.sl[q]=true;
+                            if(totalper==n){
+                                break;
+                            }
+                        }
+                    }
+                }else if(couch.equalsIgnoreCase("3rdAC")){
+                    for(int q=0;q<s.tAC.length;q++){
+                        if(s.tAC[q]==false){
+                            totalper++;
+                            s.tAC[q]=true;
+                        }
+                        if(totalper==n){
+                                break;
+                        }
+                    }
+                }else if(couch.equalsIgnoreCase("2rdAC")){
+                    for(int q=0;q<s.sAC.length;q++){
+                        if(s.sAC[q]==false){
+                            totalper++;
+                            s.sAC[q]=true;
+                        }
+                        if(totalper==n){
+                                break;
+                        }
+                    }
+                }else{
+                    for(int q=0;q<s.fAC.length;q++){
+                        if(!(s.fAC[q])){
+                            totalper++;
+                            s.fAC[q]=true;
+                        }
+                        if(totalper==n){
+                                break;
+                        }
+                    }
+                }
     }
 
     private static int calculate(String couch,Train t,String src,String dest){
@@ -293,7 +342,7 @@ public class User {
         }
 
         br.flush();
-        br.flush();
+        br.close();
         System.out.println("File Save.. File Name : "+fileName);
     }
 

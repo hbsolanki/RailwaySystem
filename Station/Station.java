@@ -24,12 +24,15 @@ public class Station{
             this.fAC=new boolean[fA];
         }
     
-    public void seatShow(){
+    public boolean seatShow(){
+        boolean flag=false;
         for(Map.Entry m : seats.entrySet()){
                 int r=(int) m.getValue();
-                if(r!=0){
+                if(r>0){
+                    flag=true;
                     System.out.println(m.getKey()+" - "+m.getValue());
                 }
         }
+        return flag;
     }
 }

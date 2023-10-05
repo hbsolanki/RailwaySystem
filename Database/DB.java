@@ -39,10 +39,10 @@ public class DB {
         }
 
         private static Connection getCon()throws Exception{
-            return DriverManager.getConnection("jdbc:mysql://localhost:3306/railway", "root","");
+            return DriverManager.getConnection("jdbc:mysql://localhost:3306/railway", "root","8160062665");
         }
 
-        //allroute(rid)
+        //allroute(rid int)
         public static void routeIdStoreInDB(int rid)throws Exception{
 
             String sql="insert into allroute(rid) values (?)";
@@ -107,7 +107,7 @@ public class DB {
         }
 
 
-        //alltrain(tno)
+        //alltrain(tno int)
         public static void trainNoStoreInDB(int tno)throws Exception{
 
             String sql="insert into alltrain(tno) values (?)";

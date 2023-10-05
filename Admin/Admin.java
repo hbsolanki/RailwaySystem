@@ -2,7 +2,7 @@ package Admin;
 
 import Station.*;
 import java.util.*;
-import Check.Check;
+import Check.Ch;
 import Database.DB;
 
 public class Admin {
@@ -158,7 +158,7 @@ public class Admin {
             do{
                 System.out.print("Enter Time Reach Train At Station : ");
                 time=sc.nextLine();
-            }while(!Check.time(time));
+            }while(!Ch.time(time));
             Station routeStaion=routeStation.get(ch-1);
 
             
