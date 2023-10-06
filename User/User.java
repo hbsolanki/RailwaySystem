@@ -88,7 +88,7 @@ public class User {
         sc.nextLine();
         String couch;
         do{
-            System.out.println("Enter Couch Name : ");
+            System.out.println("Enter Coach Name : ");
             couch=sc.nextLine();
             if(sourcStationObj.seats.containsKey(couch)){
                 break;
@@ -118,10 +118,8 @@ public class User {
                 //sl
                 if(couch.equalsIgnoreCase("sl")){
                     for(int q=0;q<sourcStationObj.sl.length;q++){
-                        System.out.println(sourcStationObj.sl[q]);
 
                         if(sourcStationObj.sl[q]==false){
-                            System.out.println("Hello");
                             totalper++;
                             person.put(name+":"+age+" seatNo-",(q+1));
                             sourcStationObj.sl[q]=true;

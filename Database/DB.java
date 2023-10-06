@@ -39,7 +39,7 @@ public class DB {
         }
 
         private static Connection getCon()throws Exception{
-            return DriverManager.getConnection("jdbc:mysql://localhost:3306/railway", "root","");
+            return DriverManager.getConnection("jdbc:mysql://localhost:3306/railway", "root","8160062665");
         }
 
         //allroute(rid int)
@@ -263,7 +263,6 @@ public class DB {
             for(int i=0;i<presonlists.length;i++){
                 String []person=presonlists[i].split("-");
                 String name=person[0].trim();
-                System.out.println(person[1]);
                 int age=Integer.parseInt(person[1].trim());
                 mapp.put(name, age);
 
@@ -288,6 +287,8 @@ public class DB {
             tick.person=mapp;
             map.put(ticketNo, tick);
         }
+        rs.close();
+        con.close();
         return map;
     }
 

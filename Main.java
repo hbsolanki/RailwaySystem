@@ -168,7 +168,7 @@ public class Main {
                 case 3 : u.printTicket(getAllTicket());
                          break;
                 case 4 : return;
-                default : System.out.println("InValid Option");            
+                default : System.out.println("InVlid Option");            
             }
         }while(true);
     }

@@ -1,0 +1,13 @@
+            *-*-* Railway Ticket *-*-*
+
+Ticket No : 146
+username : hb
+Phone Number : 8160062665
+Source Station : Gandhinagar
+Destiniy Station : Ahmedabad
+Time : 07:00-09:00
+Total KM : 60
+Price : 420
+Ticket Type :1stAC
+Persons Lists : 
+   ✤HB:19 seatNo - 1
